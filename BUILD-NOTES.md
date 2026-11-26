@@ -26,7 +26,7 @@ fresh in this session; the kit starter was used only as a structural model
 ## Missions (keys 1/2/3 on title/over screens)
 
 1. RING RUN — fly all 10 rings; centre bonus, fuel bonus at the end.
-2. GRASS STRIP LANDING — land on the strip at 4,200 m: under 46 KT, sink under 6, level.
+2. GRASS STRIP LANDING — land on the strip at 4,200 m: under 74 KT, sink under 6, level.
 3. TIMED COURSE — 8 rings against a 75 s clock; every ring buys 9 s.
 
 Depth: throttle discipline (fuel burns with throttle), hard banks bleed speed,
@@ -52,6 +52,28 @@ a slow wing stalls and drops, a low approach on final is judged, not warned abou
 - Compass tape range narrowed (-80..80) so edge labels are not clipped.
 - Panel labels moved fully inside the panel (were clipped at its top edge).
 - End screen detail line is mission-aware ("Touchdown at 57 KT" for landing).
+- Landing banner speed limit was stated in internal units, not displayed knots:
+  the banner said "UNDER 46 KT" but the HUD shows speed x1.6, so the real
+  limit (RUNWAY.maxSpeed 46) is 74 KT displayed — the end shot celebrated a
+  57 KT touchdown under a "46 KT" banner. Fixed in render.js only: the banner
+  now derives the limit from the threshold, `Math.round(RUNWAY.maxSpeed * 1.6)`
+  = 74 KT; sink wording untouched (vertical speed is displayed raw, same units
+  as the threshold). No logic, threshold, physics or other file changed.
+  Shots 3 and 4 re-rendered; 1 and 2 byte-identical.
+
+## Revision — banner knots fix (26 Nov, after commit 627dc97)
+
+- [x] `MAKEFUN_OUTPUT_DIR=/tmp/mf-out-rev1 node main.ts` exits 0, dossier.json parses
+  (keys: cover, images, schema, text)
+- [x] Same build as user nobody (world-readable copy, /tmp/mf-out-nobody):
+  exit 0, dossier parses, NO new files in the copy's cwd.
+- [x] Determinism: capture run twice after the fix, identical sha256s:
+  1-cover 57b40ff8309a… (UNCHANGED), 2-title 5d9eddf1ca4e… (UNCHANGED),
+  3-runway 45521313b59a…, 4-end 29f369f98d06…
+- [x] Visual check of re-rendered shots: banner reads "UNDER 74 KT, SINK UNDER 6";
+  shot 4 shows "Touchdown at 57 KT" under the 74 KT limit — consistent, landing
+  still reads as a success.
+- [ ] NOT submitted — parent submits after the quota reset (prep only).
 
 ## Verification (all run 26 Nov, before commit 80997c0)
 

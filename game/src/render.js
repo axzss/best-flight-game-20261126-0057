@@ -680,7 +680,7 @@ export function createRenderer(canvas) {
     ctx.font = `600 12px ${FONT}`;
     const sub =
       state.mission === MISSION_LANDING
-        ? 'SLOW · LEVEL · GENTLE — UNDER 46 KT, SINK UNDER 6'
+        ? `SLOW · LEVEL · GENTLE — UNDER ${Math.round(RUNWAY.maxSpeed * 1.6)} KT, SINK UNDER 6`
         : state.mission === MISSION_TIMED
           ? 'EVERY RING BUYS 9 SECONDS'
           : 'SMOOTH TURNS KEEP YOUR SPEED';
