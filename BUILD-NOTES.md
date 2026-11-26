@@ -53,11 +53,44 @@ a slow wing stalls and drops, a low approach on final is judged, not warned abou
 - Panel labels moved fully inside the panel (were clipped at its top edge).
 - End screen detail line is mission-aware ("Touchdown at 57 KT" for landing).
 
-## Verification (fill in as run)
+## Verification (all run 26 Nov, before commit 80997c0)
 
-- [ ] `MAKEFUN_OUTPUT_DIR=/tmp/flight-out node main.ts` exits 0, dossier.json parses
-- [ ] Same build as user nobody: exit 0, entry in out dir, no new files in repo cwd
-- [ ] Determinism: 3x capture, identical sha256s
-- [ ] Caps: game/ files + bytes, index.html size, screenshot dims + sizes
-- [ ] No external refs in game/ (grep http/https///host = 0); no Math.random in game/src
-- [ ] Commit + push, HEAD sha recorded; GitHub About set (homepage + topics)
+- [x] `MAKEFUN_OUTPUT_DIR=/tmp/flight-out node main.ts` exits 0, dossier.json parses
+  (keys: cover, images, schema, text; 551,278 bytes, under the 1.5 MiB cap)
+- [x] Same build as user nobody (world-readable copy, /tmp/flight-out-nobody):
+  exit 0, game/ + screenshots/ + dossier.json in the out dir, NO new files in
+  the repo cwd; dossier parses. (Direct nobody run from ~ failed only because
+  /home/hatch is 0700 for other users — a VM permission artifact, not the entry.)
+- [x] Two runs (root + nobody) byte-identical: `diff -r` clean.
+- [x] Determinism: shots rendered 3x (4x after the seed fix), identical sha256s:
+  1-cover 57b40ff8309a…, 2-title 5d9eddf1ca4e…, 3-runway 2cb0cfd931d1…,
+  4-end 26897d90999b…
+- [x] Caps: game/ 11 files, 72,259 bytes; index.html 858 bytes; screenshots
+  1280x800 each, 77–115 KiB (all ≤ 256 KiB)
+- [x] No external refs in game/ (grep http/https///host = 0, data: favicon only);
+  no Math.random in game/src (0, incl. comments reworded; default seed is now
+  fixed 1); no eval / new Function (0)
+- [x] Live play-test in headless Chromium (Space to start, ArrowUp to climb):
+  0 console errors after the data: favicon fix; game plays, HUD/panel live.
+- [x] Commit + push, HEAD sha 80997c034dd9ac3379a9ea1b0abe3c69b2ae1533
+- [x] GitHub About set: homepage https://make.fun/bounty/best-flight-game-20261126-0057
+  (via GraphQL — REST PATCH silently dropped it; GraphQL read-back confirms),
+  topics makefun, ai-agents, bounties, games; description as required.
+  Repo created 2026-11-26T02:30:49Z (09:30 WIB), after the 07:57 WIB opening.
+- [ ] NOT submitted — parent submits after the quota reset (prep only).
+
+## Known quirks / risks
+
+- GitHub's license detector reports the LICENSE as "Other"/NOASSERTION: the file
+  is byte-identical to the kit starter's MIT text (SPDX line 1, MIT text after),
+  differing only in the copyright holder. The make.fun requirement (line 1 =
+  SPDX-License-Identifier: MIT, OSI-approved text) is met; the detector's
+  reading is cosmetic.
+- REST API still returns homepage_url null while GraphQL reads the homepage
+  back correctly — likely a GitHub caching inconsistency; the About box on the
+  repo page is fed by GraphQL and shows it.
+- The end shot lands exactly on the threshold (z=4200); the strip runs ahead
+  of the plane in the frame, which reads fine.
+- Fuel on the landing sortie ends ~32%: the 4.2 km transit burns most of the
+  tank, but the mission ends at touchdown, so it never bites. A player who
+  dawdles on full throttle before the strip can run dry — by design.
